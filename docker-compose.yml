@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: postgres
+    image: postgres:16rc1
+    restart: "always"
+    ports:
+      - 5432:5432
+    volumes:
+      - "./database:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_DB=news
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "drizzle"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 30s
+    networks:
+      - betterNews
+
+  admin:
+    image: dpage/pgadmin4
+    restart: "always"
+    ports:
+      - 8080:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - betterNews
+
+networks:
+  betterNews: {}

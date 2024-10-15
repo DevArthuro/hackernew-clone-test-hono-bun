@@ -1,9 +1,10 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
-import drizzlePlugin from "eslint-plugin-drizzle";
-import eslintPrettierConfig, { plugins } from "./prettier.config";
 import { fixupPluginRules } from "@eslint/compat";
+import pluginJs from "@eslint/js";
+import drizzlePlugin from "eslint-plugin-drizzle";
+import globals from "globals";
+import tseslint from "typescript-eslint";
+
+import eslintPrettierConfig, { plugins } from "./prettier.config";
 
 export default [
   { files: ["**/*.{js,mjs,cjs,ts}"] },
