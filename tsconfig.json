@@ -25,7 +25,7 @@
     "noPropertyAccessFromIndexSignature": true,
 
     "paths": {
-      "@/commons/*": ["./commons/*"],
+      "@/common/*": ["./common/*"],
       "@/*": ["./server/*"]
     }
   }

@@ -25,8 +25,11 @@ services:
   admin:
     image: dpage/pgadmin4
     restart: "always"
+    environment:
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_DEFAULT_EMAIL=carlos@gmail.com
     ports:
-      - 8080:8080
+      - "8080:80"
     depends_on:
       db:
         condition: service_healthy
