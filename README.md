@@ -22,3 +22,9 @@ Run the container
 if you have problems with permissions in the mapped volume
 
 `chmod -R 777 ./database`
+
+# Migrations
+
+migrate the shemas
+
+`bunx drizzle-kit push`
