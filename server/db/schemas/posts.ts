@@ -26,8 +26,6 @@ export const postsRelations = relations(postsTable, ({ one, many }) => ({
     references: [userTable.id],
     relationName: "author",
   }),
-  postUpVotesTable: many(postUpvotesTable, {
-    relationName: "postUpvote",
-  }),
+  postUpvotesTable: many(postUpvotesTable, { relationName: "postUpvotes" }),
   comments: many(commentsTable),
 }));
