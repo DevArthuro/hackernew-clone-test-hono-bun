@@ -21,4 +21,13 @@ export const loginSchema = z.object({
   password: z.string().min(3).max(255),
 });
 
-export const createPostSchema = insertpostSchema.pick();
+export const createPostSchema = insertpostSchema
+  .pick({
+    title: true,
+    url: true,
+    content: true,
+  })
+  .refine((data) => data.url || data.content, {
+    message: "Either URL or Content must be provided",
+    path: ["url", "content"],
+  });
