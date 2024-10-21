@@ -90,8 +90,6 @@ export const authRouter = new Hono<Context>()
       return c.redirect("/");
     }
 
-    console.log("pass here");
-
     await lucia.invalidateSession(session.id);
     c.header("Set-Cookie", lucia.createBlankSessionCookie().serialize());
     return c.redirect("/");
