@@ -8,6 +8,7 @@ import { postsTable } from "@/db/schemas/posts";
 import { postUpvotesTable } from "@/db/schemas/upvotes";
 import { loggedIn } from "@/middleware/loggedIn";
 import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
 
 import {
   createPostSchema,
@@ -116,4 +117,41 @@ export const postRouter = new Hono<Context>()
       },
       200,
     );
-  });
+  })
+  .post(
+    "/:id/upvote",
+    loggedIn,
+    zValidator(
+      "param",
+      z.object({
+        id: z.coerce.number(),
+      }),
+    ),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const user = c.get("user")!;
+
+      let pointsChange: -1 | 1 = 1;
+
+      const points = await db.transaction(async (tx) => {
+        const [existingUpvote] = await db
+          .select()
+          .from(postUpvotesTable)
+          .where(
+            and(
+              eq(postUpvotesTable.id, id),
+              eq(postUpvotesTable.userId, user.id),
+            ),
+          )
+          .limit(1);
+
+        pointsChange = existingUpvote ? -1 : 1;
+
+        const [updated] = await tx
+          .update(postsTable)
+          .set({ points: sql`${postsTable.points} +  ${pointsChange}` })
+          .where(eq(postsTable.id, id))
+          .returning({ points: postsTable.points });
+      });
+    },
+  );
