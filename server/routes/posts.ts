@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { and, asc, countDistinct, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/adapter";
@@ -134,7 +135,7 @@ export const postRouter = new Hono<Context>()
       let pointsChange: -1 | 1 = 1;
 
       const points = await db.transaction(async (tx) => {
-        const [existingUpvote] = await db
+        const [existingUpvote] = await tx
           .select()
           .from(postUpvotesTable)
           .where(
@@ -152,6 +153,35 @@ export const postRouter = new Hono<Context>()
           .set({ points: sql`${postsTable.points} +  ${pointsChange}` })
           .where(eq(postsTable.id, id))
           .returning({ points: postsTable.points });
+
+        if (!updated) {
+          throw new HTTPException(404, { message: "Post not found" });
+        }
+
+        if (existingUpvote) {
+          await tx
+            .delete(postUpvotesTable)
+            .where(eq(postUpvotesTable.id, existingUpvote.id));
+        } else {
+          await tx.insert(postUpvotesTable).values({
+            postId: id,
+            userId: user.id,
+          });
+        }
+
+        return updated.points;
       });
+
+      return c.json<SuccessResponse<{ count: number; isUpvoted: boolean }>>(
+        {
+          success: true,
+          message: "Post updated",
+          data: {
+            count: points,
+            isUpvoted: pointsChange > 0,
+          },
+        },
+        200,
+      );
     },
   );
