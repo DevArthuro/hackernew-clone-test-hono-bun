@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { validator } from "hono/validator";
 import { and, asc, countDistinct, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/adapter";
@@ -12,6 +13,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 
 import {
+  createCommentSchema,
   createPostSchema,
   paginationSchema,
   type PaginatedResponse,
@@ -183,5 +185,17 @@ export const postRouter = new Hono<Context>()
         },
         200,
       );
+    },
+  )
+  .post(
+    "/:id/comment",
+    loggedIn,
+    zValidator("param", z.object({ id: z.coerce.number() })),
+    zValidator("form", createCommentSchema),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const { content } = c.req.valid("form");
+
+      const user = c.get("user")!;
     },
   );
